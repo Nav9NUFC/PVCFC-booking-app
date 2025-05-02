@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelsall Villa Colts F.C. - Pitch Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#d10000',
+                        secondary: '#000000',
+                        accent: '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .calendar-day {
+            min-height: 80px;
+        }
+        .booking-match {
+            background-color: rgba(209, 0, 0, 0.7);
+            border-left: 4px solid #d10000;
+        }
+        .booking-training {
+            background-color: rgba(0, 100, 0, 0.7);
+            border-left: 4px solid #006400;
+        }
+        .booking-friendly {
+            background-color: rgba(0, 0, 150, 0.7);
+            border-left: 4px solid #000096;
+        }
+        .booking-tournament {
+            background-color: rgba(150, 0, 150, 0.7);
+            border-left: 4px solid #960096;
+        }
+        .booking-other {
+            background-color: rgba(100, 100, 100, 0.7);
+            border-left: 4px solid #646464;
+        }
+        .unavailable {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            position: relative;
+        }
+        .unavailable::after {
+            content: "UNAVAILABLE";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 12px;
+            font-weight: bold;
+            color: #d10000;
+            background-color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Header -->
+    <header class="bg-primary text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <img id="club-logo" src="https://via.placeholder.com/80" alt="Pelsall Villa Colts F.C. Logo" class="h-16 w-16 object-contain">
+                <div>
+                    <h1 class="text-2xl font-bold">Pelsall Villa Colts F.C.</h1>
+                    <p class="text-sm">Pitch Booking System</p>
+                </div>
+            </div>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="#" class="hover:underline" onclick="showSection('home')">Home</a></li>
+                    <li><a href="#" class="hover:underline" onclick="showSection('booking')">Book Pitch</a></li>
+                    <li><a href="#" class="hover:underline" onclick="showSection('availability')">Availability</a></li>
+                    <li><a href="#" class="hover:underline" onclick="showSection('account')">My Account</a></li>
+                    <li><button id="admin-btn" class="bg-secondary px-3 py-1 rounded hover:bg-gray-800 hidden" onclick="showAdminSection()">Admin</button></li>
+                    <li><button id="login-btn" class="bg-secondary px-3 py-1 rounded hover:bg-gray-800" onclick="showLoginModal()">Login</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Home Section -->
+        <section id="home" class="section-content">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold text-primary mb-4">Welcome to Pelsall Villa Colts F.C.</h2>
+                <p class="mb-4">Welcome to our pitch booking system. Here you can book pitches for matches, training sessions, friendlies, tournaments, and other events at our EDC and Long Lane facilities.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-xl font-semibold text-secondary mb-2">EDC Facility</h3>
+                        <p>Our EDC facility features multiple pitches of different sizes:</p>
+                        <ul class="list-disc pl-5 mt-2">
+                            <li>3 x 11-a-side pitches (full or half)</li>
+                            <li>3 x 9-a-side pitches (full or half)</li>
+                            <li>3 x 5-a-side pitches (full or half)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-xl font-semibold text-secondary mb-2">Long Lane Facility</h3>
+                        <p>Our Long Lane facility features:</p>
+                        <ul class="list-disc pl-5 mt-2">
+                            <li>Multiple pitches of various sizes</li>
+                            <li>Grass and artificial surfaces</li>
+                            <li>Flexible booking options</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-6 bg-primary text-white p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">Need Help?</h3>
+                    <p>For booking assistance, please contact: <a href="mailto:info@pelsallvillacolts.com" class="underline">info@pelsallvillacolts.com</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Booking Section -->
+        <section id="booking" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-primary mb-6">Book a Pitch</h2>
+                <div id="booking-form-container" class="hidden">
+                    <form id="booking-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="booking-team" class="block text-sm font-medium text-gray-700 mb-1">Team Name</label>
+                                <input type="text" id="booking-team" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required readonly>
+                            </div>
+                            <div>
+                                <label for="booking-email" class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                                <input type="email" id="booking-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="booking-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                <select id="booking-location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                                    <option value="">Select Location</option>
+                                    <option value="EDC">EDC</option>
+                                    <option value="Long Lane">Long Lane</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="booking-pitch" class="block text-sm font-medium text-gray-700 mb-1">Pitch</label>
+                                <select id="booking-pitch" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required disabled>
+                                    <option value="">Select Pitch</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="booking-date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <input type="date" id="booking-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            </div>
+                            <div>
+                                <label for="booking-time" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                                <select id="booking-time" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                                    <option value="">Select Time</option>
+                                    <option value="09:00-11:00">09:00 - 11:00</option>
+                                    <option value="11:00-13:00">11:00 - 13:00</option>
+                                    <option value="13:00-15:00">13:00 - 15:00</option>
+                                    <option value="15:00-17:00">15:00 - 17:00</option>
+                                    <option value="17:00-19:00">17:00 - 19:00</option>
+                                    <option value="19:00-21:00">19:00 - 21:00</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="booking-type" class="block text-sm font-medium text-gray-700 mb-1">Booking Type</label>
+                                <select id="booking-type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                                    <option value="">Select Type</option>
+                                    <option value="match">Match</option>
+                                    <option value="training">Training</option>
+                                    <option value="friendly">Friendly</option>
+                                    <option value="tournament">Tournament</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="booking-size" class="block text-sm font-medium text-gray-700 mb-1">Pitch Size</label>
+                                <select id="booking-size" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                                    <option value="">Select Size</option>
+                                    <option value="full">Full Pitch</option>
+                                    <option value="half">Half Pitch</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="booking-notes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                            <textarea id="booking-notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400" onclick="checkAvailability()">Check Availability</button>
+                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-red-800">Submit Booking</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="booking-login-prompt" class="text-center py-10">
+                    <h3 class="text-xl font-semibold text-secondary mb-4">Please login to book a pitch</h3>
+                    <button onclick="showLoginModal()" class="px-6 py-2 bg-primary text-white rounded-md hover:bg-red-800">Login / Register</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Availability Section -->
+        <section id="availability" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-primary mb-6">Pitch Availability</h2>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-secondary">Filter Options</h3>
+                        <div class="flex space-x-2">
+                            <button id="prev-week" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300" onclick="changeWeek(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button id="next-week" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300" onclick="changeWeek(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="availability-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <select id="availability-location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="all">All Locations</option>
+                                <option value="EDC">EDC</option>
+                                <option value="Long Lane">Long Lane</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="availability-pitch" class="block text-sm font-medium text-gray-700 mb-1">Pitch</label>
+                            <select id="availability-pitch" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="all">All Pitches</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-red-600 mr-1"></div>
+                            <span class="text-sm">Match</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-600 mr-1"></div>
+                            <span class="text-sm">Training</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-600 mr-1"></div>
+                            <span class="text-sm">Friendly</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-purple-600 mr-1"></div>
+                            <span class="text-sm">Tournament</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-gray-600 mr-1"></div>
+                            <span class="text-sm">Other</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="availability-calendar" class="overflow-x-auto">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Account Section -->
+        <section id="account" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div id="account-login-prompt" class="text-center py-10">
+                    <h3 class="text-xl font-semibold text-secondary mb-4">Please login to view your account</h3>
+                    <button onclick="showLoginModal()" class="px-6 py-2 bg-primary text-white rounded-md hover:bg-red-800">Login / Register</button>
+                </div>
+                
+                <div id="account-content" class="hidden">
+                    <h2 class="text-2xl font-bold text-primary mb-6">My Account</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h3 class="text-lg font-semibold text-secondary mb-3">Personal Information</h3>
+                            <div class="space-y-2">
+                                <p><span class="font-medium">Name:</span> <span id="account-name">John Doe</span></p>
+                                <p><span class="font-medium">Email:</span> <span id="account-email">john.doe@example.com</span></p>
+                                <p><span class="font-medium">Team:</span> <span id="account-team">Pelsall Villa U12</span></p>
+                            </div>
+                            <button onclick="showEditAccountModal()" class="mt-4 px-3 py-1 bg-primary text-white text-sm rounded-md hover:bg-red-800">Edit Information</button>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h3 class="text-lg font-semibold text-secondary mb-3">Password</h3>
+                            <p class="mb-3">Change your account password</p>
+                            <button onclick="showChangePasswordModal()" class="px-3 py-1 bg-primary text-white text-sm rounded-md hover:bg-red-800">Change Password</button>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h3 class="text-lg font-semibold text-secondary mb-3">Booking History</h3>
+                            <p class="mb-2"><span class="font-medium">Total Bookings:</span> <span id="total-bookings">5</span></p>
+                            <p><span class="font-medium">Upcoming Bookings:</span> <span id="upcoming-bookings">2</span></p>
+                            <button onclick="showBookingHistory()" class="mt-4 px-3 py-1 bg-primary text-white text-sm rounded-md hover:bg-red-800">View All</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-secondary mb-3">Upcoming Bookings</h3>
+                        <div id="upcoming-bookings-list" class="space-y-3">
+                            <!-- Bookings will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Section -->
+        <section id="admin" class="section-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-primary mb-6">Admin Dashboard</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold text-secondary mb-3">Pitch Management</h3>
+                        <p class="mb-3">Add, edit or remove pitches from the system</p>
+                        <button onclick="showPitchManagement()" class="px-3 py-1 bg-primary text-white text-sm rounded-md hover:bg-red-800">Manage Pitches</button>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold text-secondary mb-3">Availability Control</h3>
+                        <p class="mb-3">Mark pitches as unavailable for specific dates</p>
+                        <button onclick="showAvailabilityControl()" class="px-3 py-1 bg-primary text-white text-sm rounded-md hover:bg-red-800">Set Unavailability</button>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-semibold text-secondary mb-3">System Settings</h3>
+                        <p class="mb-3">Change verification email and other settings</p>
+                        <button onclick="showSystemSettings()" class="px-3 py-1 bg-primary text-white text-sm rounded-md hover:bg-red-800">System Settings</button>
+                    </div>
+                </div>
+                
+                <div id="admin-content">
+                    <!-- Admin content will be loaded here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <img id="footer-logo" src="https://via.placeholder.com/60" alt="Pelsall Villa Colts F.C. Logo" class="h-12 w-12 object-contain inline-block mr-2">
+                    <span class="text-lg font-bold">Pelsall Villa Colts F.C.</span>
+                </div>
+                <div class="text-center md:text-right">
+                    <p>&copy; 2023 Pelsall Villa Colts F.C. All rights reserved.</p>
+                    <p>Website: <a href="https://www.pelsallvillacolts.com" class="underline hover:text-gray-300" target="_blank">www.pelsallvillacolts.com</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Login / Register</h3>
+                    <button onclick="hideModal('login-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="login-tabs" class="mb-4 border-b border-gray-200">
+                    <div class="flex">
+                        <button id="login-tab" class="px-4 py-2 font-medium text-primary border-b-2 border-primary">Login</button>
+                        <button id="register-tab" class="px-4 py-2 font-medium text-gray-500 hover:text-primary">Register</button>
+                    </div>
+                </div>
+                
+                <div id="login-form-container">
+                    <form id="login-form" class="space-y-4">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <input type="email" id="login-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="login-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="remember-me" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                            </div>
+                            <a href="#" class="text-sm text-primary hover:underline" onclick="showForgotPasswordModal()">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-red-800">Login</button>
+                    </form>
+                </div>
+                
+                <div id="register-form-container" class="hidden">
+                    <form id="register-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="register-firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                <input type="text" id="register-firstname" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            </div>
+                            <div>
+                                <label for="register-surname" class="block text-sm font-medium text-gray-700 mb-1">Surname</label>
+                                <input type="text" id="register-surname" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <input type="email" id="register-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label for="register-team" class="block text-sm font-medium text-gray-700 mb-1">Team Name</label>
+                            <input type="text" id="register-team" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="register-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label for="register-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                            <input type="password" id="register-confirm-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="register-terms" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" required>
+                            <label for="register-terms" class="ml-2 block text-sm text-gray-700">I agree to the <a href="#" class="text-primary hover:underline">Terms and Conditions</a></label>
+                        </div>
+                        <button type="submit" class="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-red-800">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Reset Password</h3>
+                    <button onclick="hideModal('forgot-password-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="forgot-password-form" class="space-y-4">
+                    <p class="text-gray-700">Enter your email address and we'll send you a link to reset your password.</p>
+                    <div>
+                        <label for="forgot-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="forgot-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-red-800">Send Reset Link</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Admin Login</h3>
+                    <button onclick="hideModal('admin-login-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="admin-login-form" class="space-y-4">
+                    <div>
+                        <label for="admin-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="admin-username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div>
+                        <label for="admin-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="admin-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-red-800">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Account Modal -->
+    <div id="edit-account-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Edit Account Information</h3>
+                    <button onclick="hideModal('edit-account-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="edit-account-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input type="text" id="edit-firstname" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div>
+                            <label for="edit-surname" class="block text-sm font-medium text-gray-700 mb-1">Surname</label>
+                            <input type="text" id="edit-surname" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="edit-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div>
+                        <label for="edit-team" class="block text-sm font-medium text-gray-700 mb-1">Team Name</label>
+                        <input type="text" id="edit-team" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal('edit-account-modal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-red-800">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Change Password</h3>
+                    <button onclick="hideModal('change-password-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="change-password-form" class="space-y-4">
+                    <div>
+                        <label for="current-password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                        <input type="password" id="current-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div>
+                        <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                        <input type="password" id="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div>
+                        <label for="confirm-new-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                        <input type="password" id="confirm-new-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal('change-password-modal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-red-800">Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking History Modal -->
+    <div id="booking-history-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Booking History</h3>
+                    <button onclick="hideModal('booking-history-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex flex-wrap gap-2">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-red-600 mr-1"></div>
+                            <span class="text-sm">Match</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-600 mr-1"></div>
+                            <span class="text-sm">Training</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-600 mr-1"></div>
+                            <span class="text-sm">Friendly</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-purple-600 mr-1"></div>
+                            <span class="text-sm">Tournament</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-gray-600 mr-1"></div>
+                            <span class="text-sm">Other</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="booking-history-list" class="space-y-3">
+                    <!-- Bookings will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Pitches Management Modal -->
+    <div id="pitches-management-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Pitches Management</h3>
+                    <button onclick="hideModal('pitches-management-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <button onclick="showAddPitchModal()" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-red-800 mb-4">
+                        <i class="fas fa-plus mr-2"></i>Add New Pitch
+                    </button>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pitch Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Surface</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pitches-list" class="bg-white divide-y divide-gray-200">
+                                <!-- Pitches will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Pitch Modal -->
+    <div id="add-pitch-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary" id="pitch-modal-title">Add New Pitch</h3>
+                    <button onclick="hideModal('add-pitch-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="pitch-form" class="space-y-4">
+                    <input type="hidden" id="pitch-id">
+                    <div>
+                        <label for="pitch-name" class="block text-sm font-medium text-gray-700 mb-1">Pitch Name</label>
+                        <input type="text" id="pitch-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                    </div>
+                    <div>
+                        <label for="pitch-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <select id="pitch-location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <option value="">Select Location</option>
+                            <option value="EDC">EDC</option>
+                            <option value="Long Lane">Long Lane</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pitch-type" class="block text-sm font-medium text-gray-700 mb-1">Pitch Type</label>
+                        <select id="pitch-type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <option value="">Select Type</option>
+                            <option value="5-a-side">5-a-side</option>
+                            <option value="7-a-side">7-a-side</option>
+                            <option value="9-a-side">9-a-side</option>
+                            <option value="11-a-side">11-a-side</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pitch-surface" class="block text-sm font-medium text-gray-700 mb-1">Pitch Surface</label>
+                        <select id="pitch-surface" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+                            <option value="">Select Surface</option>
+                            <option value="Grass">Grass</option>
+                            <option value="Artificial Grass">Artificial Grass</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pitch-description" class="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                        <textarea id="pitch-description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal('add-pitch-modal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-red-800">Save Pitch</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Availability Control Modal -->
+    <div id="availability-control-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">Availability Control</h3>
+                    <button onclick="hideModal('availability-control-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="unavailable-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <select id="unavailable-location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="all">All Locations</option>
+                                <option value="EDC">EDC</option>
+                                <option value="Long Lane">Long Lane</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="unavailable-pitch" class="block text-sm font-medium text-gray-700 mb-1">Pitch</label>
+                            <select id="unavailable-pitch" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="all">All Pitches</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label for="unavailable-start" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <input type="date" id="unavailable-start" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label for="unavailable-end" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                            <input type="date" id="unavailable-end" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label for="unavailable-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason (Optional)</label>
+                        <input type="text" id="unavailable-reason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="E.g., Maintenance, Tournament, etc.">
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end">
+                        <button onclick="setUnavailability()" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-red-800">Set Unavailability</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-secondary mb-3">Current Unavailability</h4>
+                    <div id="unavailability-list" class="space-y-3">
+                        <!-- Unavailability periods will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Settings Modal -->
+    <div id="system-settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-primary">System Settings</h3>
+                    <button onclick="hideModal('system-settings-modal')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="system-settings-form" class="space-y-4">
+                    <div>
+                        <label for="verification-email" class="block text-sm font-medium text-gray-700 mb-1">Verification Email</label>
+                        <input type="email" id="verification-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" value="pvcfc.swifts@gmail.com" required>
+                        <p class="text-xs text-gray-500 mt-1">This email will receive account verification and password reset requests</p>
+                    </div>
+                    
+                    <div>
+                        <label for="club-logo-url" class="block text-sm font-medium text-gray-700 mb-1">Club Logo URL</label>
+                        <input type="url" id="club-logo-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="https://example.com/logo.png">
+                        <p class="text-xs text-gray-500 mt-1">Enter URL to update club logo</p>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal('system-settings-modal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-red-800">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div id="success-notification" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg flex items-center hidden z-50">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="success-message">Operation completed successfully!</span>
+    </div>
+
+    <!-- Error Notification -->
+    <div id="error-notification" class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg flex items-center hidden z-50">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span id="error-message">An error occurred!</span>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        let users = [];
+        let loggedInUser = null;
+        let isAdmin = false;
+        let currentWeek = 0;
+        
+        // Sample pitches data
+        let pitches = [
+            { id: 1, name: "Pitch 1.a", location: "EDC", type: "11-a-side", surface: "Grass", description: "Main 11-a-side pitch" },
+            { id: 2, name: "Pitch 2.a", location: "EDC", type: "11-a-side", surface: "Grass", description: "Secondary 11-a-side pitch" },
+            { id: 3, name: "Pitch 3.a", location: "EDC", type: "11-a-side", surface: "Artificial Grass", description: "Artificial 11-a-side pitch" },
+            { id: 4, name: "Pitch 1.b", location: "EDC", type: "9-a-side", surface: "Grass", description: "Main 9-a-side pitch" },
+            { id: 5, name: "Pitch 2.b", location: "EDC", type: "9-a-side", surface: "Grass", description: "Secondary 9-a-side pitch" },
+            { id: 6, name: "Pitch 3.b", location: "EDC", type: "7-a-side", surface: "Artificial Grass", description: "Flexible 7/9-a-side pitch" },
+            { id: 7, name: "Pitch 1.c", location: "EDC", type: "5-a-side", surface: "Artificial Grass", description: "Main 5-a-side pitch" },
+            { id: 8, name: "Pitch 2.c", location: "EDC", type: "5-a-side", surface: "Artificial Grass", description: "Secondary 5-a-side pitch" },
+            { id: 9, name: "Pitch 3.c", location: "EDC", type: "5-a-side", surface: "Artificial Grass", description: "Additional 5-a-side pitch" },
+            { id: 10, name: "Pitch A", location: "Long Lane", type: "11-a-side", surface: "Grass", description: "Main Long Lane pitch" },
+            { id: 11, name: "Pitch B", location: "Long Lane", type: "9-a-side", surface: "Grass", description: "Secondary Long Lane pitch" }
+        ];
+        
+        // Sample bookings data
+        let bookings = [
+            { id: 1, pitchId: 1, userId: 1, teamName: "Pelsall Villa U12", date: "2023-06-15", time: "09:00-11:00", type: "training", size: "full", notes: "Weekly training session" },
+            { id: 2, pitchId: 3, userId: 2, teamName: "Walsall Juniors", date: "2023-06-15", time: "11:00-13:00", type: "match", size: "full", notes: "League match" },
+            { id: 3, pitchId: 5, userId: 3, teamName: "Bloxwich FC", date: "2023-06-16", time: "15:00-17:00", type: "friendly", size: "half", notes: "Pre-season friendly" },
+            { id: 4, pitchId: 7, userId: 1, teamName: "Pelsall Villa U12", date: "2023-06-17", time: "17:00-19:00", type: "training", size: "full", notes: "Skills session" },
+            { id: 5, pitchId: 2, userId: 4, teamName: "Walsall Wood", date: "2023-06-18", time: "13:00-15:00", type: "tournament", size: "full", notes: "Summer tournament" }
+        ];
+        
+        // Sample unavailability data
+        let unavailability = [
+            { id: 1, pitchId: "all", location: "EDC", startDate: "2023-06-20", endDate: "2023-06-22", reason: "Maintenance work" },
+            { id: 2, pitchId: 10, location: "Long Lane", startDate: "2023-06-25", endDate: "2023-06-25", reason: "Local tournament" }
+        ];
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default for booking form
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('booking-date').value = today;
+            document.getElementById('booking-date').min = today;
+            
+            // Generate availability calendar
+            generateAvailabilityCalendar();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Check if there's a logged in user in session storage
+            checkSession();
+        });
+        
+        function checkSession() {
+            const user = sessionStorage.getItem('loggedInUser');
+            if (user) {
+                loggedInUser = JSON.parse(user);
+                updateLoginState();
+                
+                // Check if admin
+                if (sessionStorage.getItem('isAdmin') === 'true') {
+                    isAdmin = true;
+                    document.getElementById('admin-btn').classList.remove('hidden');
+                }
+            }
+        }
+        
+        function setupEventListeners() {
+            // Login/Register tabs
+            document.getElementById('login-tab').addEventListener('click', function(e) {
+                e.preventDefault();
+                showLoginTab();
+            });
+            
+            document.getElementById('register-tab').addEventListener('click', function(e) {
+                e.preventDefault();
+                showRegisterTab();
+            });
+            
+            // Location change in booking form
+            document.getElementById('booking-location').addEventListener('change', function() {
+                updatePitchDropdown(this.value, 'booking-pitch');
+            });
+            
+            // Location change in availability filter
+            document.getElementById('availability-location').addEventListener('change', function() {
+                updatePitchDropdown(this.value, 'availability-pitch');
+            });
+            
+            // Location change in unavailability filter
+            document.getElementById('unavailable-location').addEventListener('change', function() {
+                updatePitchDropdown(this.value, 'unavailable-pitch');
+            });
+            
+            // Form submissions
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('register-form').addEventListener('submit', handleRegister);
+            document.getElementById('forgot-password-form').addEventListener('submit', handleForgotPassword);
+            document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
+            document.getElementById('booking-form').addEventListener('submit', handleBooking);
+            document.getElementById('edit-account-form').addEventListener('submit', handleEditAccount);
+            document.getElementById('change-password-form').addEventListener('submit', handleChangePassword);
+            document.getElementById('pitch-form').addEventListener('submit', handlePitchForm);
+            document.getElementById('system-settings-form').addEventListener('submit', handleSystemSettings);
+        }
+        
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show the requested section
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+        
+        function showLoginModal() {
+            showModal('login-modal');
+            showLoginTab();
+        }
+        
+        function showForgotPasswordModal() {
+            hideModal('login-modal');
+            showModal('forgot-password-modal');
+        }
+        
+        function showAdminLoginModal() {
+            showModal('admin-login-modal');
+        }
+        
+        function showEditAccountModal() {
+            if (loggedInUser) {
+                document.getElementById('edit-firstname').value = loggedInUser.firstName;
+                document.getElementById('edit-surname').value = loggedInUser.surname;
+                document.getElementById('edit-email').value = loggedInUser.email;
+                document.getElementById('edit-team').value = loggedInUser.teamName;
+                showModal('edit-account-modal');
+            }
+        }
+        
+        function showChangePasswordModal() {
+            showModal('change-password-modal');
+        }
+        
+        function showBookingHistory() {
+            if (loggedInUser) {
+                const userBookings = bookings.filter(booking => booking.userId === loggedInUser.id);
+                const bookingList = document.getElementById('booking-history-list');
+                bookingList.innerHTML = '';
+                
+                if (userBookings.length === 0) {
+                    bookingList.innerHTML = '<p class="text-gray-500">No bookings found.</p>';
+                } else {
+                    userBookings.forEach(booking => {
+                        const pitch = pitches.find(p => p.id === booking.pitchId);
+                        const bookingElement = document.createElement('div');
+                        bookingElement.className = 'bg-gray-50 p-3 rounded-lg border border-gray-200';
+                        
+                        let typeClass = '';
+                        switch(booking.type) {
+                            case 'match': typeClass = 'booking-match'; break;
+                            case 'training': typeClass = 'booking-training'; break;
+                            case 'friendly': typeClass = 'booking-friendly'; break;
+                            case 'tournament': typeClass = 'booking-tournament'; break;
+                            default: typeClass = 'booking-other';
+                        }
+                        
+                        bookingElement.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-medium">${pitch ? pitch.name : 'Unknown Pitch'} (${pitch ? pitch.location : 'Unknown'})</h4>
+                                    <p>${formatDate(booking.date)} | ${booking.time}</p>
+                                    <p>Type: ${capitalizeFirstLetter(booking.type)} | Size: ${capitalizeFirstLetter(booking.size)} Pitch</p>
+                                    ${booking.notes ? `<p class="text-sm mt-1">Notes: ${booking.notes}</p>` : ''}
+                                </div>
+                                <div class="px-3 py-1 rounded-md ${typeClass} text-white text-sm font-medium">
+                                    ${capitalizeFirstLetter(booking.type)}
+                                </div>
+                            </div>
+                        `;
+                        bookingList.appendChild(bookingElement);
+                    });
+                }
+                
+                showModal('booking-history-modal');
+            }
+        }
+        
+        function showAdminSection() {
+            if (isAdmin) {
+                showSection('admin');
+            } else {
+                showAdminLoginModal();
+            }
+        }
+        
+        function showPitchManagement() {
+            const pitchesList = document.getElementById('pitches-list');
+            pitchesList.innerHTML = '';
+            
+            pitches.forEach(pitch => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${pitch.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${pitch.location}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${pitch.type}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${pitch.surface}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editPitch(${pitch.id})" class="text-primary hover:text-red-800 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deletePitch(${pitch.id})" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                pitchesList.appendChild(row);
+            });
+            
+            showModal('pitches-management-modal');
+        }
+        
+        function showAddPitchModal() {
+            document.getElementById('pitch-modal-title').textContent = 'Add New Pitch';
+            document.getElementById('pitch-form').reset();
+            document.getElementById('pitch-id').value = '';
+            showModal('add-pitch-modal');
+        }
+        
+        function editPitch(pitchId) {
+            const pitch = pitches.find(p => p.id === pitchId);
+            if (pitch) {
+                document.getElementById('pitch-modal-title').textContent = 'Edit Pitch';
+                document.getElementById('pitch-id').value = pitch.id;
+                document.getElementById('pitch-name').value = pitch.name;
+                document.getElementById('pitch-location').value = pitch.location;
+                document.getElementById('pitch-type').value = pitch.type;
+                document.getElementById('pitch-surface').value = pitch.surface;
+                document.getElementById('pitch-description').value = pitch.description || '';
+                showModal('add-pitch-modal');
+            }
+        }
+        
+        function deletePitch(pitchId) {
+            if (confirm('Are you sure you want to delete this pitch? This cannot be undone.')) {
+                pitches = pitches.filter(p => p.id !== pitchId);
+                showPitchManagement();
+                showSuccess('Pitch deleted successfully');
+            }
+        }
+        
+        function showAvailabilityControl() {
+            // Populate unavailability list
+            const unavailabilityList = document.getElementById('unavailability-list');
+            unavailabilityList.innerHTML = '';
+            
+            if (unavailability.length === 0) {
+                unavailabilityList.innerHTML = '<p class="text-gray-500">No unavailability periods set.</p>';
+            } else {
+                unavailability.forEach(period => {
+                    const pitchName = period.pitchId === 'all' ? 'All Pitches' : 
+                                    pitches.find(p => p.id === period.pitchId)?.name || 'Unknown Pitch';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'bg-gray-50 p-3 rounded-lg border border-gray-200';
+                    item.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium">${pitchName} (${period.location})</h4>
+                                <p>${formatDate(period.startDate)} to ${formatDate(period.endDate)}</p>
+                                ${period.reason ? `<p class="text-sm mt-1">Reason: ${period.reason}</p>` : ''}
+                            </div>
+                            <button onclick="removeUnavailability(${period.id})" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    unavailabilityList.appendChild(item);
+                });
+            }
+            
+            showModal('availability-control-modal');
+        }
+        
+        function removeUnavailability(id) {
+            if (confirm('Are you sure you want to remove this unavailability period?')) {
+                unavailability = unavailability.filter(period => period.id !== id);
+                showAvailabilityControl();
+                generateAvailabilityCalendar();
+                showSuccess('Unavailability period removed');
+            }
+        }
+        
+        function showSystemSettings() {
+            showModal('system-settings-modal');
+        }
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+        
+        function showLoginTab() {
+            document.getElementById('login-tab').classList.add('text-primary', 'border-primary');
+            document.getElementById('login-tab').classList.remove('text-gray-500');
+            document.getElementById('register-tab').classList.remove('text-primary', 'border-primary');
+            document.getElementById('register-tab').classList.add('text-gray-500');
+            document.getElementById('login-form-container').classList.remove('hidden');
+            document.getElementById('register-form-container').classList.add('hidden');
+        }
+        
+        function showRegisterTab() {
+            document.getElementById('register-tab').classList.add('text-primary', 'border-primary');
+            document.getElementById('register-tab').classList.remove('text-gray-500');
+            document.getElementById('login-tab').classList.remove('text-primary', 'border-primary');
+            document.getElementById('login-tab').classList.add('text-gray-500');
+            document.getElementById('register-form-container').classList.remove('hidden');
+            document.getElementById('login-form-container').classList.add('hidden');
+        }
+        
+        function updatePitchDropdown(location, targetId) {
+            const pitchDropdown = document.getElementById(targetId);
+            pitchDropdown.innerHTML = '<option value="all">All Pitches</option>';
+            
+            if (location && location !== 'all') {
+                const filteredPitches = pitches.filter(pitch => pitch.location === location);
+                filteredPitches.forEach(pitch => {
+                    const option = document.createElement('option');
+                    option.value = pitch.id;
+                    option.textContent = `${pitch.name} (${pitch.type})`;
+                    pitchDropdown.appendChild(option);
+                });
+                
+                pitchDropdown.disabled = false;
+            } else if (targetId === 'booking-pitch') {
+                pitchDropdown.disabled = true;
+            }
+        }
+        
+        function generateAvailabilityCalendar() {
+            const calendar = document.getElementById('availability-calendar');
+            calendar.innerHTML = '';
+            
+            // Get current week dates
+            const now = new Date();
+            const startDate = new Date(now);
+            startDate.setDate(now.getDate() + (currentWeek * 7) - now.getDay());
+            
+            const days = [];
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startDate);
+                day.setDate(startDate.getDate() + i);
+                days.push(day);
+            }
+            
+            // Create calendar header
+            const headerRow = document.createElement('div');
+            headerRow.className = 'grid grid-cols-7 gap-1 mb-1';
+            
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'text-center font-medium py-2 bg-gray-200 rounded-t';
+                dayHeader.textContent = day.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'text-center py-1 bg-gray-200';
+                dateHeader.textContent = day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                const headerContainer = document.createElement('div');
+                headerContainer.appendChild(dayHeader);
+                headerContainer.appendChild(dateHeader);
+                
+                headerRow.appendChild(headerContainer);
+            });
+            
+            calendar.appendChild(headerRow);
+            
+            // Create time slots
+            const timeSlots = [
+                '09:00-11:00', '11:00-13:00', '13:00-15:00', 
+                '15:00-17:00', '17:00-19:00', '19:00-21:00'
+            ];
+            
+            timeSlots.forEach(timeSlot => {
+                const timeRow = document.createElement('div');
+                timeRow.className = 'grid grid-cols-7 gap-1 mb-1';
+                
+                days.forEach(day => {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'calendar-day bg-white border border-gray-200 p-1';
+                    
+                    const formattedDate = day.toISOString().split('T')[0];
+                    const locationFilter = document.getElementById('availability-location').value;
+                    const pitchFilter = document.getElementById('availability-pitch').value;
+                    
+                    // Filter bookings for this day and time slot
+                    let filteredBookings = bookings.filter(booking => 
+                        booking.date === formattedDate && 
+                        booking.time === timeSlot
+                    );
+                    
+                    // Apply filters if set
+                    if (locationFilter && locationFilter !== 'all') {
+                        filteredBookings = filteredBookings.filter(booking => {
+                            const pitch = pitches.find(p => p.id === booking.pitchId);
+                            return pitch && pitch.location === locationFilter;
+                        });
+                    }
+                    
+                    if (pitchFilter && pitchFilter !== 'all') {
+                        filteredBookings = filteredBookings.filter(booking => booking.pitchId == pitchFilter);
+                    }
+                    
+                    // Check for unavailability
+                    const isUnavailable = checkUnavailability(formattedDate, timeSlot, locationFilter, pitchFilter);
+                    
+                    if (isUnavailable) {
+                        dayCell.classList.add('unavailable');
+                    } else if (filteredBookings.length > 0) {
+                        // Show bookings
+                        filteredBookings.forEach(booking => {
+                            const pitch = pitches.find(p => p.id === booking.pitchId);
+                            if
+</html>
